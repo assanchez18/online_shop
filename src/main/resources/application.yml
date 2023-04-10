@@ -3,8 +3,8 @@ spring:
   config.activate.on-profile: prod
   datasource:
     url: jdbc:postgresql://localhost:5433/postgres
-    username: postgres
-    password: admin
+    username: prod_user
+    password: prod_password
     driverClassName: org.postgresql.Driver
     hikari:
       connectionTimeout: 20000
@@ -19,9 +19,10 @@ spring:
 spring:
   config.activate.on-profile: test,dev
   datasource:
-    url: ${DB_URL}
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:postgresql://localhost:5433/postgres_test
+    username: test_user
+    password: password
+    driverClassName: org.postgresql.Driver
   jpa:
     show-sql: true
     generate-ddl: true

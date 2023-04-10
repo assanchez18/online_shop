@@ -39,7 +39,7 @@ public class UserController {
 
     @PostMapping("/addUser")
     public void addUser(@RequestBody String name) {
-        userService.save(new User(name));
+        userService.save(new User(UUID.randomUUID(), name));
     }
 
 }

@@ -1,18 +1,17 @@
 package com.online.shop
 
-import com.online.shop.containers.ContainersConfig
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
+import spock.lang.Specification
 
 import javax.sql.DataSource
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest//(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = [TiendaOnlineApplication.class])
 @ActiveProfiles("test")
-//@ExtendWith(SpringExtension.class)
-class IntegrationSpec extends ContainersConfig {
+class IntegrationSpec extends Specification {
     @Autowired
     DataSource dataSource
 

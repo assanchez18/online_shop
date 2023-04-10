@@ -14,8 +14,8 @@ public class User {
     private String name;
     private UserRole role;
 
-    public User(String name) {
-        this.id = null;
+    public User(UUID userId, String name) {
+        this.id = userId;
         this.name = name;
         this.role = UserRole.EMPLOYEE;
     }

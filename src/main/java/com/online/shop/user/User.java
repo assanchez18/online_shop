@@ -1,5 +1,6 @@
 package com.online.shop.user;
 
+import com.online.shop.user.persistence.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -16,6 +17,12 @@ public class User {
     public User(String name) {
         this.id = null;
         this.name = name;
+        this.role = UserRole.EMPLOYEE;
+    }
+
+    public User(UserEntity user) {
+        this.id = user.getId();
+        this.name = user.getName();
         this.role = UserRole.EMPLOYEE;
     }
 }

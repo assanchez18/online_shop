@@ -1,13 +1,13 @@
 package com.online.shop.user;
 
 import com.online.shop.user.persistence.UserEntity;
+import com.online.shop.user.persistence.filters.UserFilters;
 
-import java.util.Set;
-import java.util.UUID;
+import java.util.List;
 
-public interface UserRepository {//extends Repository<UserEntity, UUID> {
+public interface UserRepository {
 
-    Set<User> getUsers(Set<UUID> userIds);
-    UserEntity getUser(UUID id);
-    UserEntity save(User user);
+    List<UserEntity> getUsers(UserFilters userIds);
+    void save(User user);
+
 }

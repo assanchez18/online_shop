@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.UUID;
 
 @Data
@@ -25,10 +27,15 @@ public class UserEntity {
     private String name;
 
     public UserEntity(User user) {
-        this.id = UUID.randomUUID();
+        this.id = user.getId();
         this.name = user.getName();
     }
 
+
+    public UserEntity(ResultSet rs) throws SQLException {
+        this.id = rs.getObject("id", UUID.class);
+        this.name = rs.getObject("name", String.class);
+    }
     //@Column(nullable = false)
     //private UserRole role;
 

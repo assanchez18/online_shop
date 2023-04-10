@@ -2,7 +2,7 @@ package com.online.shop.user.persistence;
 
 import com.online.shop.user.User;
 import com.online.shop.user.UserRepository;
-import com.online.shop.user.UserRole;
+import com.online.shop.user.persistence.filters.UserFilters;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -12,51 +12,63 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
 public class UserRepositoryImpl implements UserRepository {
 
-    private static final String ID = "id";
+    public static final String ID = "id";
+    public static final String TABLE = "public.\"users\"";
     private static final String NAME = "name";
     private static final String ROLE = "role";
     private static final String CREATION_TIME = "creationTime";
-    private static final String TABLE = "public.\"users\"";
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     @Override
-    public Set<User> getUsers(Set<UUID> userIds) {
-        return userIds.stream()
-                .map(id -> new User(id, "userPeter:", UserRole.EMPLOYEE))
-                .collect(Collectors.toSet());
+    public List<UserEntity> getUsers(UserFilters userFilters) {
+        StringBuilder sqlBuilder = new StringBuilder(buildSelectAllQuery());
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        buildPreparedSqlStatement(sqlBuilder, params, userFilters);
+        return namedParameterJdbcTemplate.query(sqlBuilder.toString(), params, this::mapRow);
     }
 
-    public UserEntity getUser(UUID id) {
-        String sql = String.format("SELECT * FROM %s WHERE %s = :%s", TABLE, ID, ID);
-        MapSqlParameterSource params = new MapSqlParameterSource(ID, id);
-        List<UserEntity> users = namedParameterJdbcTemplate.query(sql, params, this::mapRow);
-        return users.isEmpty() ? null : users.get(0);
+    private String buildSelectAllQuery() {
+        return String.format("SELECT * FROM %s ",TABLE);
+    }
 
+
+    private void buildPreparedSqlStatement(StringBuilder sqlBuilder, MapSqlParameterSource params, UserFilters filters) {
+        if (!filters.getFilters().isEmpty()) {
+            sqlBuilder.append(" WHERE ");
+            final String AND = " AND ";
+            filters.getFilters().forEach(filter -> {
+                sqlBuilder.append(filter.getFilterQuery()).append(AND);
+                params.addValues(filter.getNamedParam());
+            });
+            sqlBuilder.delete(sqlBuilder.length() - AND.length(), sqlBuilder.length());
+        }
+        if (null != filters.getOrderBy()) {
+            sqlBuilder.append(filters.getOrderBy().getFilterQuery());
+        }
+
+        /*
+        if (null != filters.pagination()) {
+            sqlBuilder.append(filters.pagination().getFilterQuery());
+        }
+         */
     }
 
     public UserEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
-        final UserEntity user = new UserEntity();
-        user.setId(rs.getObject("id", UUID.class));
-        user.setName(rs.getObject("name", String.class));
-        return user;
+        return new UserEntity(rs);
     }
 
     @Override
-    public UserEntity save(User user) {
+    public void save(User user) {
         UserEntity entity = new UserEntity(user);
         final SqlParameterSource source = createSource(entity);
         String sql = String.format("insert into %s (%s, %s) values (:%s, :%s)", TABLE, ID, NAME, ID, NAME);
         namedParameterJdbcTemplate.update(sql, source);
-        return entity;
     }
 
     private SqlParameterSource createSource(UserEntity user) {

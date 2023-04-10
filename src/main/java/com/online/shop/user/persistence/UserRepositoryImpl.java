@@ -18,7 +18,7 @@ import java.util.List;
 public class UserRepositoryImpl implements UserRepository {
 
     public static final String ID = "id";
-    public static final String TABLE = "public.\"users\"";
+    public static final String TABLE = "production.\"users\"";
     private static final String NAME = "name";
     private static final String ROLE = "role";
     private static final String CREATION_TIME = "creationTime";

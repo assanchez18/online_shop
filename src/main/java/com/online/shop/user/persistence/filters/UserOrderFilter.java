@@ -7,14 +7,15 @@ import com.online.shop.user.persistence.UserRepositoryImpl;
 
 public class UserOrderFilter extends InternalOrderFilter implements InternalUserFilter {
 
-    public UserOrderFilter(OrderType orderType, String table, FilterField orderField) {
-        super(orderType, table, orderField);
+    public UserOrderFilter(FilterField orderField, OrderType orderType) {
+        super(orderField, orderType, UserRepositoryImpl.TABLE);
     }
 
     @Override
     protected String getFieldName() {
         return switch ((UserFilterField) orderField) {
-            case USER_ID -> UserRepositoryImpl.ID;
+            case USER_ID, TEAM_LEAD -> UserRepositoryImpl.ID;
+            case USER_ROLE -> UserRepositoryImpl.ROLE;
         };
 
     }

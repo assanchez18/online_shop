@@ -25,7 +25,7 @@ public class UserController {
     @GetMapping("/{userId}")
     public Set<UserDto> getUsers(@PathVariable UUID userId) {
         User a = userService.getUser(userId);
-        return Set.of(new UserDto(UUID.randomUUID(), a.getName()));
+        return Set.of(new UserDto(a));
 
     }
 
@@ -39,7 +39,7 @@ public class UserController {
 
     @PostMapping("/addUser")
     public void addUser(@RequestBody String name) {
-        userService.save(new User(UUID.randomUUID(), name));
+        userService.save(new User(UUID.randomUUID(), name, UserRole.EMPLOYEE));
     }
 
 }

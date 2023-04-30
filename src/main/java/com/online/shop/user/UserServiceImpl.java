@@ -2,13 +2,10 @@ package com.online.shop.user;
 
 import com.online.shop.user.persistence.UserEntity;
 import com.online.shop.user.persistence.UserRepositoryImpl;
-import com.online.shop.user.persistence.filters.InternalUserFilter;
 import com.online.shop.user.persistence.filters.UserFilters;
-import com.online.shop.user.persistence.filters.UserIdsFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -20,7 +17,8 @@ public class UserServiceImpl implements UserService {
     private final UserRepositoryImpl userRepository;
     @Override
     public List<User> getUsers(Set<UUID> userIds) {
-        return convertUserEntityToUser(userRepository.getUsers(buildUserFilters(userIds)));
+        final UserFilters filters = UserFilters.builder().withUserIds(userIds).build();;
+        return convertUserEntityToUser(userRepository.getUsers(filters));
     }
 
     @Override
@@ -38,11 +36,4 @@ public class UserServiceImpl implements UserService {
         return entities.stream().map(User::new).toList();
     }
 
-    private UserFilters buildUserFilters(Set<UUID> ids) {
-        List<InternalUserFilter> filters = new ArrayList<>();
-        filters.add(new UserIdsFilter(ids));
-        return UserFilters.builder()
-                .filters(filters)
-                .build();
-    }
 }

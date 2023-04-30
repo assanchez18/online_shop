@@ -1,14 +1,16 @@
 package com.online.shop
 
+import com.online.shop.user.persistence.UserRepositoryImpl
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 
 import javax.sql.DataSource
 
-@SpringBootTest//(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@SpringBootTest
 @ContextConfiguration(classes = [TiendaOnlineApplication.class])
 @ActiveProfiles("test")
 class IntegrationSpec extends Specification {
@@ -16,7 +18,7 @@ class IntegrationSpec extends Specification {
     DataSource dataSource
 
     ArrayList<String> tables = [
-            'users'
+            UserRepositoryImpl.TABLE
     ]
 
     def setup() {
@@ -28,7 +30,7 @@ class IntegrationSpec extends Specification {
     }
 
     def truncate(tables) {
-        //def jdbcTemplate = new JdbcTemplate(dataSource: dataSource)
-        //tables.forEach { table -> jdbcTemplate.execute("TRUNCATE TABLE ${table}") }
+        def jdbcTemplate = new JdbcTemplate(dataSource: dataSource)
+        tables.forEach { table -> jdbcTemplate.execute("TRUNCATE TABLE ${table}") }
     }
 }

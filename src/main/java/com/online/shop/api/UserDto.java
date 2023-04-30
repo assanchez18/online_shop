@@ -1,16 +1,18 @@
 package com.online.shop.api;
 
-import lombok.AllArgsConstructor;
+import com.online.shop.user.User;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 import java.util.UUID;
 
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
 public class UserDto {
 
-    private UUID id;
-    private String name;
+    private final UUID id;
+    private final String name;
+
+    public UserDto(User user) {
+        this.id = user.getId();
+        this.name = user.getName();
+    }
 }

@@ -4,6 +4,7 @@ import com.online.shop.user.User;
 import com.online.shop.user.UserRepository;
 import com.online.shop.user.persistence.filters.UserFilters;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.buf.StringUtils;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Repository
@@ -19,9 +21,21 @@ public class UserRepositoryImpl implements UserRepository {
 
     public static final String ID = "id";
     public static final String TABLE = "production.\"users\"";
-    private static final String NAME = "name";
-    private static final String ROLE = "role";
-    private static final String CREATION_TIME = "creationTime";
+    public static final String NAME = "name";
+    public static final String ROLE = "role";
+    public static final String CREATION_TIME = "creation_time";
+
+    private static final List<String> INSERT_COLS = List.of(
+            ID,
+            NAME,
+            ROLE,
+            CREATION_TIME
+    );
+
+    private static final List<String> UPDATE_COLS = List.of(
+            NAME,
+            ROLE
+    );
 
     private final NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
@@ -42,8 +56,8 @@ public class UserRepositoryImpl implements UserRepository {
         if (!filters.getFilters().isEmpty()) {
             sqlBuilder.append(" WHERE ");
             final String AND = " AND ";
-            filters.getFilters().forEach(filter -> {
-                sqlBuilder.append(filter.getFilterQuery()).append(AND);
+            filters.getFilters().values().forEach(filter -> {
+                sqlBuilder.append("(").append(filter.getFilterQuery()).append(")").append(AND);
                 params.addValues(filter.getNamedParam());
             });
             sqlBuilder.delete(sqlBuilder.length() - AND.length(), sqlBuilder.length());
@@ -66,79 +80,36 @@ public class UserRepositoryImpl implements UserRepository {
     @Override
     public void save(User user) {
         UserEntity entity = new UserEntity(user);
-        final SqlParameterSource source = createSource(entity);
-        String sql = String.format("insert into %s (%s, %s) values (:%s, :%s)", TABLE, ID, NAME, ID, NAME);
-        namedParameterJdbcTemplate.update(sql, source);
+        namedParameterJdbcTemplate.update(buildUpsertQuery(), createSource(entity));
+    }
+
+    private String buildUpsertQuery() {
+        return String.format("INSERT INTO %s (%s) VALUES (%s) ON CONFLICT (%s) DO UPDATE SET %s;",
+                TABLE, buildColumns(), buildParameters(), ID, buildUpdateColumns());
+    }
+
+    private String buildUpdateColumns() {
+        return StringUtils.join(UPDATE_COLS.stream()
+                .map(column -> column + "=:" + column)
+                .collect(Collectors.toList()),',');
+    }
+
+    private String buildColumns() {
+        return StringUtils.join(INSERT_COLS, ',');
+    }
+
+    private String buildParameters() {
+        return StringUtils.join(INSERT_COLS.stream()
+                .map(column -> ":" + column)
+                .collect(Collectors.toList()),',');
     }
 
     private SqlParameterSource createSource(UserEntity user) {
         final MapSqlParameterSource source = new MapSqlParameterSource();
         source.addValue(ID, user.getId());
         source.addValue(NAME, user.getName());
-        return source;
-
-    }
-/*
-    private final JdbcTemplate jdbcTemplate;
-    private final UserConverter userConverter;
-
-    private static final String[] INSERT_COLS = {
-            ID,
-            NAME,
-            ROLE,
-            CREATION_TIME
-    };
-    private static final String[] UPDATE_COLS = {
-            ID,
-            NAME,
-            ROLE,
-            CREATION_TIME
-    };
-
-
-    @Override
-    public Set<User> getUsers(Set<UUID> userIds) {
-        List<UserEntity> users = jdbcTemplate.query("Select * from UserRepository", this::mapRow);
-        return users.stream().map(userConverter::userEntityToUser).collect(Collectors.toSet());
-    }
-
-    @Override
-    public User save(User user) {
-        try {
-            final SqlParameterSource source = createSource(user);
-            final String upsertSql = upsert(TABLE, asList(INSERT_COLS.clone()), asList(UPDATE_COLS.clone()), ID);
-
-            jdbcTemplate.update(upsertSql, source);
-            return user;
-        }catch (Exception e) {
-            throw e;
-        }
-    }
-
-    private UserEntity mapRow(ResultSet rs, int rowNum) throws SQLException {
-        final UserEntity user = new UserEntity();
-        user.setId(rs.getObject(ID, UUID.class));
-        user.setName(rs.getString(NAME));
-        user.setRole(rs.getObject(ROLE, UserRole.class));
-        user.setCreationTime(rs.getObject(CREATION_TIME, LocalDate.class));
-        return user;
-    }
-    private SqlParameterSource createSource(User user) {
-        final MapSqlParameterSource source = new MapSqlParameterSource();
-        source.addValue(ID, user.getId());
-        source.addValue(NAME, user.getName());
-        source.addValue(ROLE, user.getRole());
-        source.addValue(CREATION_TIME, LocalDate.now());
+        source.addValue(ROLE, user.getRole().name());
+        source.addValue(CREATION_TIME, user.getCreationTime());
         return source;
     }
-
-    public static String upsert(String table, List<String> insertFields, List<String> updateFields, String uniqueKey) {
-        return "insert into " + table + " (" + StringUtils.join(insertFields, ',') + ") values (" + (String)insertFields.stream().map((p) -> {
-            return ":" + p;
-        }).collect(Collectors.joining(", ")) + ")" + " on conflict (" + uniqueKey + ") do update set " + (String)updateFields.stream().map((p) -> {
-            return p + " = :" + p;
-        }).collect(Collectors.joining(", "));
-    }
-
- */
 }

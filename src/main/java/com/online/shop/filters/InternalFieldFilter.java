@@ -4,12 +4,11 @@ import lombok.AllArgsConstructor;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
 @AllArgsConstructor
-public abstract class InternalIdsFilter implements InternalFilter {
+public abstract class InternalFieldFilter implements InternalFilter {
 
-    private final Set<UUID> ids;
+    private final Set<?> ids;
     private final String tableName;
     private final String columnName;
     private final String paramName;
@@ -17,7 +16,7 @@ public abstract class InternalIdsFilter implements InternalFilter {
 
     @Override
     public String getFilterQuery() {
-        return String.format("%s.%s IN (:%s)", tableName, columnName, paramName);
+        return String.format("(%s.%s IN (:%s))", tableName, columnName, paramName);
     }
 
     @Override

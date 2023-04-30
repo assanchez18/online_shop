@@ -7,10 +7,9 @@ import java.util.Map;
 @AllArgsConstructor
 public abstract class InternalOrderFilter implements InternalFilter {
 
+    protected final FilterField orderField;
     private final OrderType orderType;
     private final String table;
-
-    protected final FilterField orderField;
 
     @Override
     public String getFilterQuery() {

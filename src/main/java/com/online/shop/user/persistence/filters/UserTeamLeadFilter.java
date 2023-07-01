@@ -1,6 +1,5 @@
 package com.online.shop.user.persistence.filters;
 
-import com.online.shop.filters.InternalFilter;
 import com.online.shop.user.UserRole;
 
 import java.util.HashMap;
@@ -8,7 +7,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-public class UserTeamLeadFilter implements InternalFilter, InternalUserFilter {
+public class UserTeamLeadFilter implements InternalUserFilter {
 
     private final UserIdsFilter userIdsFilter;
     private final UserRoleFilter userRoleFilter;

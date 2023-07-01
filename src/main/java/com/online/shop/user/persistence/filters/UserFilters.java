@@ -22,6 +22,7 @@ public class UserFilters {
     private UserFilters(Map<UserFilterField, InternalUserFilter> filter, UserOrderFilter orderBy) {
         this.filters = filter;
         this.orderBy = null == orderBy ? DEFAULT_ORDER_BY : orderBy;
+
     }
 
     public static UserFiltersBuilder builder() {

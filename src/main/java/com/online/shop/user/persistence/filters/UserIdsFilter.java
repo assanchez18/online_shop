@@ -8,7 +8,7 @@ import java.util.UUID;
 
 import static com.online.shop.user.persistence.filters.UserFilterField.USER_ID;
 
-public class UserIdsFilter  extends InternalFieldFilter implements InternalUserFilter {
+public class UserIdsFilter extends InternalFieldFilter implements InternalUserFilter {
 
     public UserIdsFilter(Set<UUID> ids) {
         super(ids, UserRepositoryImpl.TABLE, UserRepositoryImpl.ID, USER_ID.getName());
